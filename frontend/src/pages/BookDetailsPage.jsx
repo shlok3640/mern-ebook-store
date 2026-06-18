@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { addToCart } from '../slices/cartSlice';
 import axios from 'axios';
 
@@ -8,6 +8,7 @@ const BookDetailsPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const { userInfo } = useSelector((state) => state.auth);
 
   const [book, setBook] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -83,6 +84,18 @@ const BookDetailsPage = () => {
             >
               Add to Cart
             </button>
+
+            {userInfo && userInfo.isAdmin && (
+              <a 
+                href={book.fileUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="btn" 
+                style={{ width: '100%', padding: '1rem', fontSize: '1.1rem', marginTop: '1rem', display: 'block', textAlign: 'center', border: '2px solid #4F46E5', color: '#4F46E5', backgroundColor: 'transparent', fontWeight: 'bold' }}
+              >
+                Read Now (Admin Bypass)
+              </a>
+            )}
           </div>
           
           <div>

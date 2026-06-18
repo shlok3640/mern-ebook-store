@@ -9,6 +9,9 @@ import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import CheckoutPage from './pages/CheckoutPage';
 import MyLibraryPage from './pages/MyLibraryPage';
+import AdminRoute from './components/AdminRoute';
+import BookList from './pages/admin/BookList';
+import BookEditPage from './pages/admin/BookEditPage';
 
 function App() {
   return (
@@ -23,6 +26,13 @@ function App() {
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/checkout" element={<CheckoutPage />} />
           <Route path="/mylibrary" element={<MyLibraryPage />} />
+          
+          {/* Admin Routes */}
+          <Route path="" element={<AdminRoute />}>
+            <Route path="/admin/booklist" element={<BookList />} />
+            <Route path="/admin/book/:id/edit" element={<BookEditPage />} />
+          </Route>
+
           {/* Future Routes: 
             <Route path="/cart" element={<CartPage />} />
             <Route path="/login" element={<LoginPage />} />

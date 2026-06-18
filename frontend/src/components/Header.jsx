@@ -33,6 +33,13 @@ const Header = () => {
                 <BookOpen size={20} />
                 <span>My Library</span>
               </Link>
+
+              {userInfo.isAdmin && (
+                <Link to="/admin/booklist" className="nav-link" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#4F46E5', fontWeight: '700' }}>
+                  <span>Admin Panel</span>
+                </Link>
+              )}
+
               <div className="nav-link" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--dark)', fontWeight: '600' }}>
                 <User size={20} />
                 <span>{userInfo.name}</span>
