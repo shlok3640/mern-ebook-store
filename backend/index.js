@@ -18,11 +18,13 @@ app.use(express.json());
 const userRoutes = require('./src/routes/userRoutes');
 const bookRoutes = require('./src/routes/bookRoutes');
 const orderRoutes = require('./src/routes/orderRoutes');
+const paymentRoutes = require('./src/routes/paymentRoutes');
 
 // Routes
 app.use('/api/users', userRoutes);
 app.use('/api/books', bookRoutes);
 app.use('/api/orders', orderRoutes);
+app.use('/api/payments', paymentRoutes);
 
 app.get('/', (req, res) => {
   res.send('API is running...');

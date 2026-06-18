@@ -23,4 +23,12 @@ const addOrderItems = async (req, res) => {
   }
 };
 
-module.exports = { addOrderItems };
+// @desc    Get logged in user orders
+// @route   GET /api/orders/myorders
+// @access  Private
+const getMyOrders = async (req, res) => {
+  const orders = await Order.find({ user: req.user._id }).populate('orderItems.book');
+  res.json(orders);
+};
+
+module.exports = { addOrderItems, getMyOrders };
