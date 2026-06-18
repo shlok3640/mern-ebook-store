@@ -10,6 +10,7 @@ import RegisterPage from './pages/RegisterPage';
 import CheckoutPage from './pages/CheckoutPage';
 import MyLibraryPage from './pages/MyLibraryPage';
 import AdminRoute from './components/AdminRoute';
+import AdminDashboard from './pages/admin/AdminDashboard';
 import BookList from './pages/admin/BookList';
 import BookEditPage from './pages/admin/BookEditPage';
 
@@ -20,6 +21,9 @@ function App() {
       <main>
         <Routes>
           <Route path="/" element={<HomePage />} />
+          <Route path="/search/:keyword" element={<HomePage />} />
+          <Route path="/page/:pageNumber" element={<HomePage />} />
+          <Route path="/search/:keyword/page/:pageNumber" element={<HomePage />} />
           <Route path="/book/:id" element={<BookDetailsPage />} />
           <Route path="/cart" element={<CartPage />} />
           <Route path="/login" element={<LoginPage />} />
@@ -29,6 +33,7 @@ function App() {
           
           {/* Admin Routes */}
           <Route path="" element={<AdminRoute />}>
+            <Route path="/admin/dashboard" element={<AdminDashboard />} />
             <Route path="/admin/booklist" element={<BookList />} />
             <Route path="/admin/book/:id/edit" element={<BookEditPage />} />
           </Route>

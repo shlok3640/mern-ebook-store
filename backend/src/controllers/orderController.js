@@ -1,5 +1,25 @@
 const Order = require('../models/Order');
 
+// @desc    Get sales metrics for admin dashboard
+// @route   GET /api/orders/metrics
+// @access  Private/Admin
+const getOrderMetrics = async (req, res) => {
+  const metrics = await Order.aggregate([
+    {
+      $match: { isPaid: true } // Only calculate paid orders
+    },
+    {
+      $group: {
+        _id: null,
+        totalRevenue: { $sum: '$totalPrice' },
+        totalOrders: { $sum: 1 },
+      }
+    }
+  ]);
+
+  res.json(metrics.length > 0 ? metrics[0] : { totalRevenue: 0, totalOrders: 0 });
+};
+
 // @desc    Create new order
 // @route   POST /api/orders
 // @access  Private
@@ -31,4 +51,4 @@ const getMyOrders = async (req, res) => {
   res.json(orders);
 };
 
-module.exports = { addOrderItems, getMyOrders };
+module.exports = { addOrderItems, getMyOrders, getOrderMetrics };

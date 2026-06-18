@@ -35,7 +35,7 @@ const Header = () => {
               </Link>
 
               {userInfo.isAdmin && (
-                <Link to="/admin/booklist" className="nav-link" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#4F46E5', fontWeight: '700' }}>
+                <Link to="/admin/dashboard" className="nav-link" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#4F46E5', fontWeight: '700' }}>
                   <span>Admin Panel</span>
                 </Link>
               )}

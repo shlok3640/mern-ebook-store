@@ -1,10 +1,64 @@
 const Book = require('../models/Book');
 
-// @desc    Fetch all books
+// @desc    Fetch all books (Public)
 // @route   GET /api/books
 const getBooks = async (req, res) => {
-  const books = await Book.find({});
-  res.json(books);
+  const pageSize = 2; // Fixed to 2 for local testing
+
+  // Defensive input sanitization for pageNumber
+  let page = Number(req.query.pageNumber);
+  if (isNaN(page) || page < 1) {
+    page = 1;
+  }
+
+  // Build dynamic query object, ALWAYS excluding archived books for the public
+  const query = { category: { $ne: 'ARCHIVED' } };
+
+  if (req.query.keyword) {
+    query.$or = [
+      { title: { $regex: req.query.keyword, $options: 'i' } },
+      { author: { $regex: req.query.keyword, $options: 'i' } }
+    ];
+  }
+
+  // Assuming your database field is 'category', mapping 'genre' query param to it
+  if (req.query.genre) {
+    query.category = req.query.genre;
+  }
+
+  // Determine sorting
+  let sortOption = {};
+  if (req.query.sort === 'price-asc') {
+    sortOption.price = 1;
+  } else if (req.query.sort === 'price-desc') {
+    sortOption.price = -1;
+  } else if (req.query.sort === 'newest') {
+    sortOption.createdAt = -1;
+  }
+
+  const count = await Book.countDocuments(query);
+  const books = await Book.find(query)
+    .sort(sortOption)
+    .limit(pageSize)
+    .skip(pageSize * (page - 1));
+
+  res.json({ books, page, pages: Math.ceil(count / pageSize) });
+};
+
+// @desc    Fetch ALL books including archived (Admin)
+// @route   GET /api/books/admin
+// @access  Private/Admin
+const getAdminBooks = async (req, res) => {
+  const pageSize = 10; // Larger page size for admin table
+  let page = Number(req.query.pageNumber);
+  if (isNaN(page) || page < 1) page = 1;
+
+  const count = await Book.countDocuments({});
+  const books = await Book.find({})
+    .limit(pageSize)
+    .skip(pageSize * (page - 1));
+
+  res.json({ books, page, pages: Math.ceil(count / pageSize) });
 };
 
 // @desc    Fetch single book
@@ -63,18 +117,22 @@ const updateBook = async (req, res) => {
   }
 };
 
-// @desc    Delete a book
+// @desc    Soft Delete a book (Archive)
 // @route   DELETE /api/books/:id
 // @access  Private/Admin
 const deleteBook = async (req, res) => {
   const book = await Book.findById(req.params.id);
 
   if (book) {
-    await book.deleteOne();
-    res.json({ message: 'Book removed' });
+    // SOFT DELETE: We do not use book.deleteOne() to preserve data integrity for orders.
+    // Since we cannot alter the schema, we assign the category to a reserved keyword 'ARCHIVED'.
+    book.category = 'ARCHIVED';
+    await book.save();
+    
+    res.json({ message: 'Book successfully archived (Soft Delete)' });
   } else {
     res.status(404).json({ message: 'Book not found' });
   }
 };
 
-module.exports = { getBooks, getBookById, createBook, updateBook, deleteBook };
+module.exports = { getBooks, getAdminBooks, getBookById, createBook, updateBook, deleteBook };
