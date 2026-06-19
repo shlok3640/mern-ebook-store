@@ -135,4 +135,86 @@ const deleteBook = async (req, res) => {
   }
 };
 
-module.exports = { getBooks, getAdminBooks, getBookById, createBook, updateBook, deleteBook };
+// @desc    Create new review
+// @route   POST /api/books/:id/reviews
+// @access  Private
+const createBookReview = async (req, res) => {
+  const { rating, comment } = req.body;
+  const bookId = req.params.id;
+  const userId = req.user._id;
+
+  const book = await Book.findById(bookId);
+
+  if (book) {
+    // 1. Check for Duplicate Review
+    const Review = require('../models/Review');
+    const alreadyReviewed = await Review.findOne({
+      book: bookId,
+      user: userId,
+    });
+
+    if (alreadyReviewed) {
+      res.status(400);
+      throw new Error('You have already reviewed this book');
+    }
+
+    // 2. Verify Purchase (Ensure user actually bought this book and paid)
+    const Order = require('../models/Order');
+    const hasBought = await Order.findOne({
+      user: userId,
+      isPaid: true,
+      'orderItems.book': bookId,
+    });
+
+    if (!hasBought) {
+      res.status(400);
+      throw new Error('You can only review books you have successfully purchased.');
+    }
+
+    // 3. Create Review Document
+    await Review.create({
+      name: req.user.name,
+      rating: Number(rating),
+      comment,
+      book: bookId,
+      user: userId,
+    });
+
+    // 4. True MongoDB Aggregation Pipeline
+    const stats = await Review.aggregate([
+      {
+        $match: { book: book._id }
+      },
+      {
+        $group: {
+          _id: '$book',
+          avgRating: { $avg: '$rating' },
+          numReviews: { $sum: 1 }
+        }
+      }
+    ]);
+
+    // 5. Update Book Document
+    if (stats.length > 0) {
+      book.rating = stats[0].avgRating;
+      book.numReviews = stats[0].numReviews;
+      await book.save();
+    }
+
+    res.status(201).json({ message: 'Review added successfully' });
+  } else {
+    res.status(404);
+    throw new Error('Book not found');
+  }
+};
+
+// @desc    Get all reviews for a specific book
+// @route   GET /api/books/:id/reviews
+// @access  Public
+const getBookReviews = async (req, res) => {
+  const Review = require('../models/Review');
+  const reviews = await Review.find({ book: req.params.id }).sort({ createdAt: -1 });
+  res.json(reviews);
+};
+
+module.exports = { getBooks, getAdminBooks, getBookById, createBook, updateBook, deleteBook, createBookReview, getBookReviews };

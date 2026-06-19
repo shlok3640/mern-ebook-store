@@ -9,6 +9,8 @@ const bookSchema = new mongoose.Schema({
   category: { type: String, required: true },
   pages: { type: Number },
   fileUrl: { type: String },
+  rating: { type: Number, required: true, default: 0 },
+  numReviews: { type: Number, required: true, default: 0 },
 }, {
   timestamps: true,
 });
